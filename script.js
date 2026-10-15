@@ -417,6 +417,7 @@ const DEFAULT_SETTINGS = {
 };
 
 const STORAGE_KEY = 'bh_school_verification_state';
+const ADMIN_SESSION_TTL_MS = 15 * 60 * 1000;
 const state = loadState();
 const activeTelegramUser = { user: null };
 
@@ -447,6 +448,12 @@ function normalizeName(value) {
   return (value || '').normalize('NFKC').replace(/\s+/g, ' ').trim().toLowerCase();
 }
 
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/g, (character) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
+  }[character]));
+}
+
 function namesMatch(nameA, nameB) {
   return normalizeName(nameA) === normalizeName(nameB);
 }
@@ -461,7 +468,8 @@ function loadState() {
     settings: { ...DEFAULT_SETTINGS, ...(persisted.settings || {}) },
     users: Array.isArray(persisted.users) ? persisted.users : [],
     pendingParentRequests: Array.isArray(persisted.pendingParentRequests) ? persisted.pendingParentRequests : [],
-    adminAuth: !!persisted.adminAuth,
+    adminAuth: !!persisted.adminAuth && Number(persisted.adminAuthExpiresAt) > Date.now(),
+    adminAuthExpiresAt: Number(persisted.adminAuthExpiresAt) || 0,
     currentView: 'student'
   };
 }
@@ -574,10 +582,10 @@ function renderVerifiedTable() {
     const classText = user.type === 'student' ? `${user.grade} / ${user.section}` : 'Teacher';
     return `
       <tr>
-        <td>${user.type}</td>
-        <td>${user.name}</td>
-        <td>${classText}</td>
-        <td>${user.telegramHandle || '—'}</td>
+        <td>${escapeHtml(user.type)}</td>
+        <td>${escapeHtml(user.name)}</td>
+        <td>${escapeHtml(classText)}</td>
+        <td>${escapeHtml(user.telegramHandle || '—')}</td>
         <td>${user.hasJoined ? '<span class="status-badge joined">Joined</span>' : '<span class="status-badge not-joined">Not Joined</span>'}</td>
         <td><button type="button" class="small-button" data-reset-user="${user.id}">Reset Status</button></td>
       </tr>
@@ -590,10 +598,10 @@ function renderVerifiedTable() {
 function renderParentRequests() {
   const rows = state.pendingParentRequests.map((request) => `
     <tr>
-      <td>${request.parentName}</td>
-      <td>${request.childName}</td>
-      <td>${request.grade} / ${request.section}</td>
-      <td>${request.parentTelegram || '—'}</td>
+      <td>${escapeHtml(request.parentName)}</td>
+      <td>${escapeHtml(request.childName)}</td>
+      <td>${escapeHtml(`${request.grade} / ${request.section}`)}</td>
+      <td>${escapeHtml(request.parentTelegram || '—')}</td>
       <td>
         <button type="button" class="approve-button" data-parent-action="approve" data-request-id="${request.id}">Approve</button>
         <button type="button" class="reject-button" data-parent-action="reject" data-request-id="${request.id}">Reject</button>
@@ -695,6 +703,7 @@ function syncHashRoute() {
 
 function toggleAdminAuth(isAuthenticated) {
   state.adminAuth = isAuthenticated;
+  state.adminAuthExpiresAt = isAuthenticated ? Date.now() + ADMIN_SESSION_TTL_MS : 0;
   saveState();
 
   if (isAuthenticated) {
