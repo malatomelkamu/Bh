@@ -660,7 +660,7 @@ function handleTelegramAuth(userData) {
 
   activeTelegramUser.user = userData;
   updateTelegramPreview(userData);
-  showMessage('Telegram verification successful. Continue to claim your access link.', 'success');
+  showMessage('Telegram identity verified. Continue to claim your access link.', 'success');
 }
 
 function revealAccess(memberName, role) {
