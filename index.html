@@ -104,10 +104,30 @@
           <p class="eyebrow">Holeta, Oromia, Ethiopia</p>
           <h1>Burka Harbu Special Secondary School</h1>
         </div>
-        <button id="admin-trigger" class="admin-button ghost-button" type="button">Admin</button>
+        <div class="header-actions">
+          <div class="security-chip" title="Bot credentials are managed by Vercel Connect and never exposed in this page">
+            <span class="security-dot" aria-hidden="true"></span>
+            <span>Protected by Vercel Connect</span>
+          </div>
+          <button id="admin-trigger" class="admin-button ghost-button" type="button">Admin</button>
+        </div>
       </header>
 
       <main class="main-layout">
+        <section class="security-banner glass-panel" aria-label="Security status">
+          <div class="security-banner-icon" aria-hidden="true">✓</div>
+          <div>
+            <p class="section-tag">Secure access layer</p>
+            <h2>Your school data stays in this browser</h2>
+            <p>Telegram credentials are handled by the connected server integration. This portal never asks for or displays your bot token.</p>
+          </div>
+          <div class="security-metrics" aria-label="Security features">
+            <span>Encrypted transport</span>
+            <span>One-time access</span>
+            <span>Admin session timeout</span>
+          </div>
+        </section>
+
         <section class="portal-switcher glass-panel">
           <button class="tab-button active" data-role="student" type="button">Student Access</button>
           <button class="tab-button" data-role="teacher" type="button">Teacher Access</button>
@@ -313,11 +333,11 @@
               <form id="admin-login-form" class="verify-form">
                 <label>
                   <span>Username</span>
-                  <input id="admin-username" type="text" value="admin_burkaharbu" required />
+                    <input id="admin-username" type="text" autocomplete="username" placeholder="Enter admin username" required />
                 </label>
                 <label>
                   <span>Password</span>
-                  <input id="admin-password" type="password" value="Burka#Harbu2026!Secure" required />
+                    <input id="admin-password" type="password" autocomplete="current-password" placeholder="Enter admin password" required />
                 </label>
                 <button class="primary-button" type="submit">Unlock Dashboard</button>
               </form>
