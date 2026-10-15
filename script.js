@@ -624,6 +624,12 @@ function updateActiveView(role) {
     button.classList.toggle('active', isActive);
   });
 
+  if (role === 'admin') {
+    window.location.hash = 'admin';
+    openAdminPanel();
+    return;
+  }
+
   document.querySelectorAll('.portal-panel').forEach((panel) => {
     panel.classList.toggle('active', panel.dataset.role === role);
   });
@@ -663,7 +669,7 @@ function revealAccess(memberName, role) {
   const memberLabel = document.getElementById('reveal-member-name');
   const groupLink = document.getElementById('group-link');
 
-  watermark.textContent = memberName;
+  watermark.textContent = `${memberName}  •  ${state.settings.adminContact}  •  ${memberName}  •  ${state.settings.adminContact}`;
   memberLabel.textContent = memberName;
   groupLink.href = state.settings.groupLink;
   groupLink.textContent = state.settings.groupLink;
@@ -673,8 +679,17 @@ function revealAccess(memberName, role) {
 }
 
 function closeRevealPanel() {
-  document.getElementById('reveal-panel').classList.add('hidden');
+  const revealPanel = document.getElementById('reveal-panel');
+  revealPanel.classList.add('hidden');
+  revealPanel.classList.remove('is-blurred');
   document.body.classList.remove('reveal-mode');
+}
+
+function setRevealPrivacyHidden(isHidden) {
+  const revealPanel = document.getElementById('reveal-panel');
+  if (!revealPanel.classList.contains('hidden')) {
+    revealPanel.classList.toggle('is-blurred', isHidden);
+  }
 }
 
 function openAdminPanel() {
@@ -966,17 +981,21 @@ function attachEventListeners() {
   });
 
   document.addEventListener('contextmenu', (event) => {
-    if (document.body.classList.contains('reveal-mode')) {
-      event.preventDefault();
-    }
+    if (document.body.classList.contains('reveal-mode')) event.preventDefault();
   });
 
   document.addEventListener('keydown', (event) => {
-    if (document.body.classList.contains('reveal-mode') && (event.key === 'F12' || event.key === 'I' || event.key === 'u')) {
-      event.preventDefault();
-    }
+    if (!document.body.classList.contains('reveal-mode')) return;
+    const key = event.key.toLowerCase();
+    const blockedShortcut = event.key === 'F12'
+      || ((event.ctrlKey || event.metaKey) && ['s', 'u'].includes(key))
+      || ((event.ctrlKey || event.metaKey) && event.shiftKey && key === 'i');
+    if (blockedShortcut) event.preventDefault();
   });
 
+  window.addEventListener('blur', () => setRevealPrivacyHidden(true));
+  window.addEventListener('focus', () => setRevealPrivacyHidden(false));
+  document.addEventListener('visibilitychange', () => setRevealPrivacyHidden(document.hidden));
   window.addEventListener('hashchange', syncHashRoute);
 }
 
@@ -992,8 +1011,6 @@ function init() {
     handleTelegramAuth(user);
   };
 
-  document.getElementById('admin-username').value = state.settings.adminUsername;
-  document.getElementById('admin-password').value = state.settings.adminPassword;
 
   if (state.adminAuth) {
     openAdminPanel();
