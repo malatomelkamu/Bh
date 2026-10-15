@@ -482,21 +482,42 @@ select:focus {
   background: rgba(4, 8, 16, 0.75);
   backdrop-filter: blur(4px);
   z-index: 10;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.reveal-panel.is-blurred .reveal-card {
+  filter: blur(28px);
+  opacity: 0.08;
+  transition: filter 120ms ease, opacity 120ms ease;
+}
+
+.reveal-panel.is-blurred::after {
+  content: 'ACCESS HIDDEN WHILE WINDOW IS INACTIVE';
+  position: absolute;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
 }
 
 .reveal-watermark {
-  position: fixed;
-  inset: 0;
+  position: absolute;
+  inset: -20%;
   display: grid;
   place-items: center;
-  font-size: clamp(2rem, 5vw, 9vw);
+  padding: 10%;
+  font-size: clamp(1rem, 2vw, 1.8rem);
   font-weight: 900;
-  letter-spacing: 0.1em;
-  color: rgba(255,255,255,0.05);
+  line-height: 5;
+  letter-spacing: 0.12em;
+  color: rgba(255,255,255,0.055);
   text-transform: uppercase;
   pointer-events: none;
   transform: rotate(-18deg);
-  white-space: nowrap;
+  white-space: pre-wrap;
+  overflow: hidden;
+  background-image: repeating-linear-gradient(-18deg, transparent 0 70px, rgba(255,255,255,0.025) 70px 72px);
 }
 
 .reveal-card {
